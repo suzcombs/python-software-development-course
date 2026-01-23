@@ -3,8 +3,8 @@ Author: Suzanne Combs
 Course: CS 3270-X01
 Main module for loading the weather data and calculating statistics.
 """
-import my_package.load_data as ld
-import my_package.weather_statistics as ws
+from my_package import load_data as ld
+from my_package import weather_statistics as ws
 
 
 def main():

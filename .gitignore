@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .env
 .Rhistory
+dist/
+build/
+*.egg-info/
+.DS_Store
