@@ -1,0 +1,18 @@
+[project]
+name = "weather-load-stats-suzannecombs"
+version = "0.0.1"
+authors = [
+  { name="Suzanne Combs", email="10270865@uvu.edu" },
+]
+description = "A package that has a module for loading a csv file and converting it to a pandas dataframe. It also has a module for generating basic statistics from the dataframe."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pandas"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
