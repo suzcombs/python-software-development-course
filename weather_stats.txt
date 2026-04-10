@@ -1,0 +1,6 @@
+Statistics Summary for MaxTemp Column
+Mean: 23.22
+Median: 22.6
+Mode: 20.0
+Min: -4.1
+Max: 48.1
