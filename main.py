@@ -13,24 +13,47 @@ All code was understood, reviewed, modified, and written by me.
 import my_package.data_fetching as d_fetch
 import my_package.data_processing as d_process
 import my_package.data_storage as d_store
+from app_logger import setup_logging
 
 
 def main() -> None:
     """
     Main function for loading data, calculating statistics, and storing statistics.
     """
+    setup_logging()  # Set up logging for the application
     # Import and save CSV weather data into a dataframe
     csv_path = "australia_weather_data/weather_training_data.csv"
-    weather_data = d_fetch.DataFetching(csv_path)
-    weather_df = weather_data.csv_to_df()
+    # Initialize the DataFetcher object
+    load_data = d_fetch.DataFetcher(csv_path)
 
-    # Calculate statistics for a specified column
-    data_processor = d_process.DataProcessing(weather_df)
-    stats = data_processor.get_statistics()
+    stats = None  # Initialize stats variable
 
-    # Store the statistics in a text file
-    storage = d_store.DataStorage("weather_stats.txt", stats)
-    storage.write_txt()
+    try:
+        weather_df = load_data.csv_to_df()  # Loads the CSV file into a dataframe
+
+        # Data cleaning convert data to numeric values.
+        # Initialize the DataCleaner object
+        data_cleaner = d_fetch.DataCleaner(weather_df)
+        cleaned_column = data_cleaner.data_to_numeric(
+            "MaxTemp")  # Convert the column to numeric values
+
+        # Process the data and get the statistics for the column
+        data_processor = d_process.DataProcessor(
+            cleaned_column, "MaxTemp")  # Initialize the DataProcessor object
+        stats = data_processor.get_statistics()  # Calculates statistics for the column
+    except FileNotFoundError:
+        print("The file was not found. Please check the file path.")
+    except ValueError as e:
+        print(f"Value error: {e}")
+
+    # Calculate and write statistics for the column to a text file
+    if stats is not None:
+        try:
+            # Initialize the DataStorer object
+            storage = d_store.DataStorer("weather_stats.txt", stats)
+            storage.write_txt()  # Write the statistics to a text file
+        except ValueError as e:  # If there was an error writing to the file, print this message
+            print(f"Value error: {e}")
 
 
 if __name__ == '__main__':
