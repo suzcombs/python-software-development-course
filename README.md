@@ -42,6 +42,13 @@ This module introduced generators and iterators to the project. A new class Data
 
 There was also file/error handling and logging added to the project in this module. There is a check to make sure a file can be loaded. If it can be loaded, an info log saying it was successful is sent to app.log, otherwise an error log is sent. There is also a check that a column exists in a dataframe and that it is a numerical value before any statistics are performed on it. If there are any values that cannot be changes to a numeric, then it is skipped and there is a warning sent to app.log.
 
+## Module 5 - Automated Testing
+
+This module introduced automated testing using both pytest and doctest. A new module test_app.py was created which contains the pytests. There were tests created for the methods csv_to_df, column_checker, data_to_numeric, get_statistics, and write_txt.
+Doctests were created for the csv_to_df, data_to_numeric, and get_statistics methods.
+The pytests for csv_to_df tested for a correct file path and an incorrect file path. The pytests for column_checker tested an existing column and a nonexistent column. The pytests for data_to_numeric tested a data frame with valid data, a data frame with some valid data, and a data frame with no valid data. The pytests for get_statistics tested for valid data and invalid data.
+Finally the pytest for write_txt tested that the method would create a file with the correct content.
+
 ## Author
 
 Suzanne Combs

@@ -4,7 +4,7 @@ This module sets up logging for the application. Configures logging
 import logging
 
 
-def setup_logging():
+def setup_logging() -> None:
     """
     Sets up a logger for the application.
 
