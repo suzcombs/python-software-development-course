@@ -5,8 +5,8 @@ This module contains the DataStorage class for storing weather statistics in a t
 See main.py for AI usage disclosure.
 """
 import logging
-from . import data_fetching as d_fetch
-from . import data_processing as d_process
+from my_package import data_fetching as d_fetch
+from my_package import data_processing as d_process
 
 logger = logging.getLogger(__name__)
 

@@ -36,6 +36,12 @@ A statistics module was created for performing mean, median, mode, min, and max 
 
 This module refactored the previous application using object oriented programming. The code was split into four modules: main.py, data_fetching.py, data_processing.py, and data_storage.py. Each module has a specific task. main.py orchestrates the application, data_fetching.py has a DataFetching class that currently converts a CSV to a dataframe, data_processing.py has a class DataProcessing which calculates the statistics of the dataframe, and DataStorage currently saves the statistics to a text file. These modules and classes can be expanded on to include different data or storage types for the future. A dataclass was created for the calculated statistics for a cleaner way to store the data. Finally, type hints were added to the code for better readability and clearer expectations.
 
+## Module 4 - Libraries for Advanced Programming
+
+This module introduced generators and iterators to the project. A new class DataCleaning was created in the data_fetching.py module. A generator was made which converts values in a column to a numeric if it is a valid type. This generator can be used for calculating the statistics for the column in the data_processing.py module with the method get_statistics. In the get_statistics method, there is an iterator which creates a list of the generator to be used for calculating statistics.
+
+There was also file/error handling and logging added to the project in this module. There is a check to make sure a file can be loaded. If it can be loaded, an info log saying it was successful is sent to app.log, otherwise an error log is sent. There is also a check that a column exists in a dataframe and that it is a numerical value before any statistics are performed on it. If there are any values that cannot be changes to a numeric, then it is skipped and there is a warning sent to app.log.
+
 ## Author
 
 Suzanne Combs

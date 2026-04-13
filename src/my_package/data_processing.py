@@ -9,7 +9,7 @@ See main.py for AI usage disclosure.
 """
 import statistics
 from dataclasses import dataclass
-from . import data_fetching as d_fetch
+from my_package import data_fetching as d_fetch
 
 
 @dataclass
@@ -29,6 +29,16 @@ class StatsSummary:
 
         Returns:
             str: String representation of the statistics summary.
+
+        Example:
+            >>> stats = StatsSummary(
+            ...     column="TestColumn", mean=2.5, median=2.3, min=1.5, max=3.7)
+            >>> print(stats)
+            Statistics Summary for TestColumn Column
+            Mean: 2.5
+            Median: 2.3
+            Min: 1.5
+            Max: 3.7
         """
         return (f"Statistics Summary for {self.column} Column\n"
                 f"Mean: {self.mean}\n"
@@ -61,6 +71,19 @@ class DataProcessor:
 
         Returns:
             StatsSummary: A dataclass containing the statistics for the specified column.
+
+        Example:
+            >>> data = [1.5, 2.3, 3.7]
+            >>> data_processor = DataProcessor(iter(data), "TestColumn")
+            >>> stats = data_processor.get_statistics()
+            >>> stats.mean
+            2.5
+            >>> stats.median
+            2.3
+            >>> stats.min
+            1.5
+            >>> stats.max
+            3.7
         """
         # change the generator into a list to be used.
         # Use of iterator. Gets numeric values from the generator.

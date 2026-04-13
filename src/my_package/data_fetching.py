@@ -35,6 +35,12 @@ class DataFetcher:
 
         Returns:
             pd.DataFrame: Dataframe containing the CSV data
+
+        Example:
+            >>> data_fetcher = DataFetcher("australia_weather_data/weather_training_data.csv")
+            >>> df = data_fetcher.csv_to_df()
+            >>> isinstance(df, pd.DataFrame)
+            True
         """
         try:
             df = pd.read_csv(self.file_path)
@@ -107,6 +113,14 @@ class DataCleaner:
 
         Parameters:
             column_name (str): Name of the column being converted.
+
+        Example:
+            >>> df = pd.DataFrame({
+            ...     "NumberColumn": ["1.5", "2.3", "3.7"]
+            ... })
+            >>> data_cleaner = DataCleaner(df)
+            >>> list(data_cleaner.data_to_numeric("NumberColumn"))
+            [1.5, 2.3, 3.7]
         """
         if not self.column_checker(column_name):
             return  # Skip if the column does not exist
