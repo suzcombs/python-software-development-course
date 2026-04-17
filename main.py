@@ -1,17 +1,18 @@
 """
 Author: Suzanne Combs
 Course: CS 3270-X01
-The main module for loading weather data, calculating statistics, and 
-storing statistics in a text file.
+The main module for loading weather data, calculating statistics, data analysis,
+and storing statistics in a text file.
 
 AI Usage Disclosure:
 This project used AI tools for assistance. GitHub Copilot was enabled in 
 Visual Studio Code, and ChatGPT was used for guidance on design and Python syntax. 
-All code was understood, reviewed, modified, and written by me.
+All code was understood, reviewed, and modified by me.
 """
 
 import my_package.data_fetching as d_fetch
 import my_package.data_processing as d_process
+import my_package.data_analysis as d_analyze
 import my_package.data_storage as d_store
 from app_logger import setup_logging
 
@@ -28,6 +29,7 @@ def main() -> None:
 
     stats = None  # Initialize stats variable
 
+    # Load the data and process it
     try:
         weather_df = load_data.csv_to_df()  # Loads the CSV file into a dataframe
 
@@ -39,6 +41,7 @@ def main() -> None:
 
         # Process the data and get the statistics for the column
         data_processor = d_process.DataProcessor(
+            # Make sure the column matches the column name used in data_to_numeric
             cleaned_column, "MaxTemp")  # Initialize the DataProcessor object
         stats = data_processor.get_statistics()  # Calculates statistics for the column
     except FileNotFoundError:
@@ -54,6 +57,16 @@ def main() -> None:
             storage.write_txt()  # Write the statistics to a text file
         except ValueError as e:  # If there was an error writing to the file, print this message
             print(f"Value error: {e}")
+
+    # Create plots and write to a PDF file
+    try:
+        data_analyzer = d_analyze.DataAnalyzer(weather_df)
+        # Write the plots to a PDF file
+        storage.write_pdf(data_analyzer, "weather_plots.pdf")
+
+    except ValueError as e:
+        print(
+            f"There is no numeric data for the specified column to plot: {e}")
 
 
 if __name__ == '__main__':

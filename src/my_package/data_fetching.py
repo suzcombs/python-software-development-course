@@ -3,13 +3,13 @@ Author: Suzanne Combs
 Course: CS 3270-X01
 This module contains the DataFetching class for converting a file into another format. It
 currently converts a CSV file to a pandas dataframe. It prints a summary of the number of
-columns and rows in the dataframe and the column names.
+columns and rows in the dataframe and the column names. A DataCleaner class is also included
+to clean the data in the dataframe. 
 See main.py for AI usage disclosure.
 """
 import logging
 import math
 import pandas as pd
-
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +123,8 @@ class DataCleaner:
             [1.5, 2.3, 3.7]
         """
         if not self.column_checker(column_name):
-            return  # Skip if the column does not exist
+            # Return empty iterator if the column does not exist
+            return iter([])
 
         for value in self.df[column_name]:
             try:
@@ -159,10 +160,13 @@ def main() -> None:
 
         # Data cleaning test to ensure data converted to numeric values.
         data_cleaner = DataCleaner(weather_df)
+        # If not valid column, would show when iterated through.
         values = data_cleaner.data_to_numeric("MaxTemp")
         # print(values) - this prints the generator object location, for the
         # values, need to iterate through
         print(values)
+        # for value in values:
+        #    print(value)
     except FileNotFoundError:
         print("The file was not found. Please check the file path.")
     except ValueError as e:
@@ -172,3 +176,5 @@ def main() -> None:
 if __name__ == '__main__':
     # Runs the main function when this file is executed
     main()
+
+# %%

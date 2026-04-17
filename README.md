@@ -7,16 +7,15 @@ This is a course long project that analyzes and visualizes weather data. It is b
 ## Installation
 
 Use pandas to transform a csv file into a dataframe
+Install matplotlib for data visualization
 
-```python
-import pandas as pd
-```
-
-To install the load_data and weather_statistics package
+To install my_package through by typing in the terminal
 
 ```python
 python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps weather-load-stats-suzannecombs
 ```
+
+Note: this package has been changed through the different modules. At the final module, I will add the changes to test.pypi.org
 
 ## Usage
 
@@ -48,6 +47,33 @@ This module introduced automated testing using both pytest and doctest. A new mo
 Doctests were created for the csv_to_df, data_to_numeric, and get_statistics methods.
 The pytests for csv_to_df tested for a correct file path and an incorrect file path. The pytests for column_checker tested an existing column and a nonexistent column. The pytests for data_to_numeric tested a data frame with valid data, a data frame with some valid data, and a data frame with no valid data. The pytests for get_statistics tested for valid data and invalid data.
 Finally the pytest for write_txt tested that the method would create a file with the correct content.
+
+## Module 6 - Functional Programming Paradigm
+
+This module added data analysis through functional programming and visualization. A new module data_analysis.py was added to the project and contains the DataAnalyzer class. This class has methods which use functional features such as zip, map, groupby, lambda, and filter. They were used to see patterns and trends in the data. There are also methods that create graphs of the data.
+
+Functional Features:
+
+- The group_by_location method uses groupby to group the data by location and calculate the mean of a numeric column for each location
+- The filter_rain_tomorrow method filters for only the rows that were prected to rain tomorrow
+- The rain_today_rain_likelihood method uses zip to bring together the columns "RainToday" "RainTomorrow" for comparison into a tuple. Filter and lambda were used to return a list of the rows where the prediction was it would rain tomorrow
+- The hot_day_rain_likelihood method uses zip to bring together the columns "MaxTemp" and "RainTomorrow" for comparision into a tuple. It uses the map function with a lambda to categorize the data into hot days or not hot days depending on the temperature. From this we can see the likeliness of rain tomorrow based on the temperature.
+
+Charts Created:
+
+- Charts for a basic histogram or a boxplot to quickly visualize the numeric data in a column. This can be useful for seeing the distribution of data for the column.
+- Barchart that has each location grouped together for the x axis and the y axis is a specified numerical column. This graph can show the correlation between data such as temperature or wind speed mean by each location for comparison.
+- Histogram of the likelihood of rain tomorrow based on whether it is raining today.
+- Barchart of the likelihood of rain tomorrow based on whether it was a hot or not as hot day today.
+
+Test Cases Automated:
+
+- A pytest.fixture was created for sample data for these tests. There were 4 pytests added
+- test_group_by_location: Created to test that the data frame was grouped by location and calculated the mean for each group for the specified column
+- test_filter_rain_tomorrow: Tests that the method filters only rows where it is predicted to rain tomorrow and creates a data frame
+- test_rain_today_rain_likelihood: Tests the method to make sure a list of tuples containing RainToday and RainTomorrow columns are created and that it filters only for the days that RainTomorrow is Yes.
+- test_hot_day_rain_likelihood: Tests the method to make sure a list of tuples containing MaxTemp and RainTomorrow columns are created and checks that the MaxTemp column is mapped to "Hot" or "Not Hot"
+- The visualizations were checked by visual inspection.
 
 ## Author
 

@@ -1,7 +1,6 @@
 """
 Author: Suzanne Combs
 Course: CS 3270-X01
-Data Processing Module
 This module contains the DataProcessing class for calculating 
 statistics from a specified column in a dataframe. It also contains a 
 dataclass for storing the statistics summary.
@@ -87,9 +86,7 @@ class DataProcessor:
         """
         # change the generator into a list to be used.
         # Use of iterator. Gets numeric values from the generator.
-        cell_data = []
-        for value in self.numeric_column_gen:
-            cell_data.append(value)
+        cell_data = self.gen_to_list()
 
         # Make sure there are items in the list before calculating statistics
         if not cell_data:
@@ -104,6 +101,15 @@ class DataProcessor:
             min=round(min(cell_data), 2),
             max=round(max(cell_data), 2)
         )
+
+    def gen_to_list(self) -> list:
+        """
+        Converts the generator of numeric values into a list.
+
+        Returns:
+            list: A list of numeric values from the generator.
+        """
+        return list(self.numeric_column_gen)
 
     def __str__(self) -> str:
         """
@@ -129,7 +135,7 @@ def main() -> None:
     Imports the CSV and converts to a dataframe using load_data.py. Calls get_statistics
     to print basic statistics of a specified column of the dataframe.
     """
-    # For testing purposes
+    # For testing purposes - Note: When I run this file, it prints any logs to the console. The main.py file logs to a file.
     # Import and save CSV weather data into a dataframe
     csv_path = "australia_weather_data/weather_training_data.csv"
     load_data = d_fetch.DataFetcher(csv_path)
@@ -147,6 +153,7 @@ def main() -> None:
         data_processor = DataProcessor(cleaned_column, "MaxTemp")
         stats = data_processor.get_statistics()
         data_processor.print_statistics(stats)
+
     except FileNotFoundError:
         print("The file was not found. Please check the file path.")
     except ValueError as e:

@@ -5,8 +5,11 @@ This module contains the DataStorage class for storing weather statistics in a t
 See main.py for AI usage disclosure.
 """
 import logging
+from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib import pyplot as plt
 from my_package import data_fetching as d_fetch
 from my_package import data_processing as d_process
+from my_package import data_analysis as d_analyze
 
 logger = logging.getLogger(__name__)
 
@@ -44,37 +47,78 @@ class DataStorer:
         """
         return f"DataStorage writing to {self.filename} with stats {self.stats}"
 
+    def write_pdf(self, analyzer, pdf_filename: str) -> None:
+        """
+        Create a PDF file and write the plots to it.
+
+        Parameters:
+            plots (list): A list of matplotlib plot objects to be written to the PDF file.
+        """
+        with PdfPages(pdf_filename) as pdf:
+            figures = [
+                analyzer.create_histogram("MaxTemp"),
+                analyzer.create_boxplot("MaxTemp"),
+                analyzer.create_barchart_by_location("Rainfall"),
+                analyzer.histogram_rainfall(),
+                analyzer.heat_rain_likelihood_barchart()
+            ]
+            for fig in figures:
+                pdf.savefig(fig)
+                plt.close(fig)
+        logger.info("Plots written to weather_plots.pdf successfully.")
+
 
 def main() -> None:
     """
     Calls write_txt to write to a txt file.   
     """
-    # For testing purposes
+    # For testing purposes - Note: When I run this file, it prints any logs to the console.
+    # The main.py file logs to a file.
     # Import and save CSV weather data into a dataframe
     csv_path = "australia_weather_data/weather_training_data.csv"
+    # Initialize the DataFetcher object
     load_data = d_fetch.DataFetcher(csv_path)
 
+    stats = None  # Initialize stats variable
+
+    # Load the data and process it
     try:
-        weather_df = load_data.csv_to_df()
-        # Make sure theconversion worked. Print basic info about the dataframe
-        load_data.print_summary(weather_df)
+        weather_df = load_data.csv_to_df()  # Loads the CSV file into a dataframe
 
-        # Data cleaning test to ensure data converted to numeric values.
+        # Data cleaning convert data to numeric values.
+        # Initialize the DataCleaner object
         data_cleaner = d_fetch.DataCleaner(weather_df)
-        cleaned_column = data_cleaner.data_to_numeric("MaxTemp")
+        cleaned_column = data_cleaner.data_to_numeric(
+            "MaxTemp")  # Convert the column to numeric values
 
-        # Process the data and print the statistics for the column
-        data_processor = d_process.DataProcessor(cleaned_column, "MaxTemp")
-        stats = data_processor.get_statistics()
-        data_processor.print_statistics(stats)
+        # Process the data and get the statistics for the column
+        data_processor = d_process.DataProcessor(
+            # Make sure the column matches the column name used in data_to_numeric
+            cleaned_column, "MaxTemp")  # Initialize the DataProcessor object
+        stats = data_processor.get_statistics()  # Calculates statistics for the column
     except FileNotFoundError:
         print("The file was not found. Please check the file path.")
     except ValueError as e:
         print(f"Value error: {e}")
 
     # Calculate and write statistics for the column to a text file
-    storage = DataStorer("weather_stats.txt", stats)
-    storage.write_txt()
+    if stats is not None:
+        try:
+            # Initialize the DataStorer object
+            storage = DataStorer("weather_stats.txt", stats)
+            storage.write_txt()  # Write the statistics to a text file
+        except ValueError as e:  # If there was an error writing to the file, print this message
+            print(f"Value error: {e}")
+
+    # Create plots and write to a PDF file
+    try:
+        data_analyzer = d_analyze.DataAnalyzer(weather_df)
+        # Write the plots to a PDF file
+        storage.write_pdf(data_analyzer, "weather_plots.pdf")
+
+    except ValueError as e:
+        print(
+            f"There is no numeric data for the specified column to plot: {e}")
 
 
 if __name__ == '__main__':

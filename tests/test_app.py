@@ -8,6 +8,7 @@ import pandas as pd
 import my_package.data_fetching as d_fetch
 import my_package.data_processing as d_process
 import my_package.data_storage as d_store
+import my_package.data_analysis as d_analysis
 
 
 # Test cases for csv_to_df method in DataFetcher class (data_fetching.py)
@@ -93,7 +94,8 @@ def test_data_to_numeric_all_invalid_data():
     data_cleaner = d_fetch.DataCleaner(df)
     # Convert to list to see if the generator skipped all invalid data and returned an empty list
     values = list(data_cleaner.data_to_numeric("NumberColumn"))
-    assert values == []
+    # Makes sure the list is empty. All values should be skipped.
+    assert not values
 
 
 # Test cases for get_statistics method in DataProcessor class (data_processing.py)
@@ -167,3 +169,76 @@ def test_write_txt_creates_file(tmp_path):
     data_storer.write_txt()
     assert filepath.exists()
     # If I want to see this fail, put asser not filepath.exists()
+
+# Reusable dataframe for testing DataAnalyzer class (data_analysis.py)
+
+
+@pytest.fixture
+def sample_df():
+    """
+    Fixture that provides a sample dataframe for testing the DataAnalyzer class.
+    """
+    return pd.DataFrame({
+        "Location": ["Location1", "Location2", "Location1", "Location2", "Location1"],
+        "MaxTemp": [25, 32, 28, 27, 30],
+        "MinTemp": [15, 20, 18, 16, 19],
+        "RainToday": ["No", "Yes", "No", "Yes", "No"],
+        "RainTomorrow": [0, 1, 0, 1, 0]
+    })
+
+
+# Test case for group_by_location method in DataAnalyzer class (data_analysis.py)
+def test_group_by_location(sample_df):
+    """
+    Test the group_by_function method and make sure it correctly groups by location
+    and calculates the mean of the specified column.
+    """
+    data_analyzer = d_analysis.DataAnalyzer(sample_df)
+    result_df = data_analyzer.group_by_location("MaxTemp")
+    assert result_df is not None
+    assert list(result_df["Location"]) == ["Location1", "Location2"]
+    assert list(result_df["MaxTemp"]) == [27.67, 29.5]
+
+
+# Test case for filter_rain_tomorrow method in DataAnalyzer class (data_analysis.py)
+def test_filter_rain_tomorrow(sample_df):
+    """
+    Test the filter_rain_tomorrow method and make sure it filters only rows where 
+    rain tomorrow is Yes. 
+    """
+    data_analyzer = d_analysis.DataAnalyzer(sample_df)
+    result_df = data_analyzer.filter_rain_tomorrow()
+    assert result_df is not None
+    assert len(result_df) == 2
+    # checks to make sure all the values are a 1 (Yes)
+    assert (result_df["RainTomorrow"] == 1).all()
+
+
+# Test case for rain_today_rain_likelihood method in DataAnalyzer class (data_analysis.py)
+def test_rain_today_rain_likelihood(sample_df):
+    """
+    Test the rain today_rain_likelihood method. It should make a list of tuples
+    for the RainToday and RainTomorrow columns. Then it should filter
+    only for rows where RainTomorrow is Yes.
+    """
+    data_analyzer = d_analysis.DataAnalyzer(sample_df)
+    result_df = data_analyzer.rain_today_rain_likelihood()
+    assert result_df == [("Yes", 1), ("Yes", 1)]
+
+
+# Test case for hot_day_rain_likelihood method in DataAnalyzer class (data_analysis.py)
+def test_hot_day_rain_likelihood(sample_df):
+    """
+    Test the hot_day_rain_likelihood method. It should make a list of tuples
+    for the MaxTemp and RainTomorrow columns. Then it should check they are 
+    valid pairs and map MaxTemp to "Hot" or "Not Hot". 
+    """
+    data_analyzer = d_analysis.DataAnalyzer(sample_df)
+    result = data_analyzer.hot_day_rain_likelihood()
+    assert result == [
+        (25, "Not Hot", 0),
+        (32, "Hot", 1),
+        (28, "Not Hot", 0),
+        (27, "Not Hot", 1),
+        (30, "Not Hot", 0)
+    ]
