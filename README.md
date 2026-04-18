@@ -75,6 +75,25 @@ Test Cases Automated:
 - test_hot_day_rain_likelihood: Tests the method to make sure a list of tuples containing MaxTemp and RainTomorrow columns are created and checks that the MaxTemp column is mapped to "Hot" or "Not Hot"
 - The visualizations were checked by visual inspection.
 
+## Module 7 - Multiprocessing and Aysnchronous Programming
+
+This module introduces asynchronous programming and multiprocessing to the project.
+
+Asynchronous programming was implemented for data fetching in csv_to_df_async() and was also implemented in write_txt_async(). This makes these methods non-blocking and allows other tasks to process instead of waiting. Both of these are I/O-bound tasks and async using the asyncio built-in module was utilized.
+
+Parallelism was implemented using multiprocessing in get_statistics_multiprocessing() using ProcessPoolExecutor to parallelize the CPU-bound statistical calculations. This allows computations such as mean, median, min, and max to be executed concurrently across different cores and allow for more efficiency.
+
+The non-asynchronous and multiprocessing methods were kept in the code for comparison. A timer was used to compare the different tasks and was removed. The results were included in the screenshots for this module. The speed of the processes were slightly quicker with asynchronous and multiprocessing, but not by much. This is likely because of the scale of the project and with more files being converted to a dataframe, write txt files, and statistics calculations the difference in speed would increase.
+
+Testing Cases:
+There were Pytests created for each of these methods. these Pytests included the same input and the same results were expected:
+
+- csv_to_df_async: a test to ensure it correctly loads, and another test to make sure empty files are handled correclty
+- write_txt_async: a test to ensure the txt file was created
+- get_statistics_multiprocessing: tests were created for when there is valid data, invalid data, and no data.
+
+Doctests for csv_to_df_async() and get_statistics_multiprocessing() were also created.
+
 ## Author
 
 Suzanne Combs

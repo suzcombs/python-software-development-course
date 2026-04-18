@@ -7,6 +7,7 @@ columns and rows in the dataframe and the column names. A DataCleaner class is a
 to clean the data in the dataframe. 
 See main.py for AI usage disclosure.
 """
+import asyncio
 import logging
 import math
 import pandas as pd
@@ -31,7 +32,7 @@ class DataFetcher:
 
     def csv_to_df(self) -> pd.DataFrame:
         """
-        Reads in a CSV file and returns a dataframe.
+        Reads in a CSV file and returns a dataframe sequentially.
 
         Returns:
             pd.DataFrame: Dataframe containing the CSV data
@@ -44,6 +45,29 @@ class DataFetcher:
         """
         try:
             df = pd.read_csv(self.file_path)
+            logger.info("The CSV file (%s) loaded successfully",
+                        self.file_path)
+            return df
+        except FileNotFoundError:
+            logger.error("The CSV file (%s) was not found.", self.file_path)
+            raise
+
+    async def csv_to_df_async(self) -> pd.DataFrame:
+        """
+        Uses asyncio to read in CSV file and return dataframe. 
+
+        Returns:
+            pd.DataFrame: Dataframe containing the CSV data
+
+        Example:
+            >>> data_fetcher = DataFetcher("australia_weather_data/weather_training_data.csv")
+            >>> df = asyncio.run(data_fetcher.csv_to_df_async())
+            >>> isinstance(df, pd.DataFrame)
+            True
+        """
+        loop = asyncio.get_event_loop()
+        try:
+            df = await loop.run_in_executor(None, pd.read_csv, self.file_path)
             logger.info("The CSV file (%s) loaded successfully",
                         self.file_path)
             return df
@@ -142,7 +166,7 @@ class DataCleaner:
                     "Skipping the value.", value, column_name)
 
 
-def main() -> None:
+async def main() -> None:
     """
     Imports CVS, calls csv_to_df to change to a dataframe.
     Changes the data in a column to numberic values and prints the values. 
@@ -154,12 +178,13 @@ def main() -> None:
     load_data = DataFetcher(csv_path)
 
     try:
-        weather_df = load_data.csv_to_df()
+        weather_df_async = await load_data.csv_to_df_async()
+
         # Make sure theconversion worked. Print basic info about the dataframe
-        load_data.print_summary(weather_df)
+        load_data.print_summary(weather_df_async)
 
         # Data cleaning test to ensure data converted to numeric values.
-        data_cleaner = DataCleaner(weather_df)
+        data_cleaner = DataCleaner(weather_df_async)
         # If not valid column, would show when iterated through.
         values = data_cleaner.data_to_numeric("MaxTemp")
         # print(values) - this prints the generator object location, for the
@@ -175,6 +200,6 @@ def main() -> None:
 
 if __name__ == '__main__':
     # Runs the main function when this file is executed
-    main()
+    asyncio.run(main())
 
 # %%

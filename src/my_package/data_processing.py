@@ -7,8 +7,78 @@ dataclass for storing the statistics summary.
 See main.py for AI usage disclosure.
 """
 import statistics
+import concurrent.futures
+import asyncio
 from dataclasses import dataclass
 from my_package import data_fetching as d_fetch
+
+
+def calc_mean(data: list) -> float:
+    """
+    Calculates the mean of a list of numeric values.
+
+    Parameters:
+        data (list): A list of numeric values.
+
+    Returns:
+        float: The mean of the list of numeric values.
+
+    Example:
+        >>> calc_mean([1.5, 2.3, 3.7])
+        2.5
+    """
+    return round(statistics.mean(data), 2)
+
+
+def calc_median(data: list) -> float:
+    """
+    Calculates the median of a list of numeric values.
+
+    Parameters:
+        data (list): A list of numeric values.
+
+    Returns:
+        float: The median of the list of numeric values.
+
+    Example:
+        >>> calc_median([1.5, 2.3, 3.7])
+        2.3
+    """
+    return round(statistics.median(data), 2)
+
+
+def calc_min(data: list) -> float:
+    """
+    Calculates the minimum value of a list of numeric values.
+
+    Parameters:
+        data (list): A list of numeric values.
+
+    Returns:
+        float: The minimum value of the list of numeric values.
+
+    Example:
+        >>> calc_min([1.5, 2.3, 3.7])
+        1.5
+    """
+    return round(min(data), 2)
+
+
+def calc_max(data: list) -> float:
+    """
+    Calculates the maximum value of a list of numeric values.
+
+    Parameters:
+        data (list): A list of numeric values.
+
+    Returns:
+        float: The maximum value of the list of numeric values.
+
+    Example:
+        >>> calc_max([1.5, 2.3, 3.7])
+        3.7
+    """
+    return round(max(data), 2)
 
 
 @dataclass
@@ -62,6 +132,15 @@ class DataProcessor:
         self.numeric_column_gen = numeric_column_gen
         self.column = column
 
+    def gen_to_list(self) -> list:
+        """
+        Converts the generator of numeric values into a list.
+
+        Returns:
+            list: A list of numeric values from the generator.
+        """
+        return list(self.numeric_column_gen)
+
     def get_statistics(self) -> StatsSummary:
         """
         Calculates the mean, median, max, and min for a specified column
@@ -102,14 +181,51 @@ class DataProcessor:
             max=round(max(cell_data), 2)
         )
 
-    def gen_to_list(self) -> list:
+    def get_statistics_multiprocessing(self) -> StatsSummary:
         """
-        Converts the generator of numeric values into a list.
+        Calculates the mean, median, max, and min for a specified column
+        in the dataframe using multiprocessing. Returns a dataclass with the 
+        statistics for the column. The default column is "MaxTemp".
 
         Returns:
-            list: A list of numeric values from the generator.
+            StatsSummary: A dataclass containing the statistics for the specified column.
+
+        Example:
+            >>> data = [1.5, 2.3, 3.7]
+            >>> data_processor = DataProcessor(iter(data), "TestColumn")
+            >>> stats = data_processor.get_statistics()
+            >>> stats.mean
+            2.5
+            >>> stats.median
+            2.3
+            >>> stats.min
+            1.5
+            >>> stats.max
+            3.7
         """
-        return list(self.numeric_column_gen)
+        # change the generator into a list to be used.
+        # Use of iterator. Gets numeric values from the generator.
+        cell_data = self.gen_to_list()
+
+        # Make sure there are items in the list before calculating statistics
+        if not cell_data:
+            raise ValueError(
+                f"The column {self.column} contains no numeric data.")
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            mean_future = executor.submit(calc_mean, cell_data)
+            median_future = executor.submit(calc_median, cell_data)
+            min_future = executor.submit(calc_min, cell_data)
+            max_future = executor.submit(calc_max, cell_data)
+
+            # Get the results from the futures
+            return StatsSummary(
+                column=self.column,
+                mean=round(mean_future.result(), 2),
+                median=round(median_future.result(), 2),
+                min=round(min_future.result(), 2),
+                max=round(max_future.result(), 2)
+            )
 
     def __str__(self) -> str:
         """
@@ -130,18 +246,19 @@ class DataProcessor:
         print(stats)
 
 
-def main() -> None:
+async def main() -> None:
     """
     Imports the CSV and converts to a dataframe using load_data.py. Calls get_statistics
     to print basic statistics of a specified column of the dataframe.
     """
-    # For testing purposes - Note: When I run this file, it prints any logs to the console. The main.py file logs to a file.
+    # For testing purposes - Note: When I run this file, it prints any logs
+    # to the console. The main.py file logs to a file.
     # Import and save CSV weather data into a dataframe
     csv_path = "australia_weather_data/weather_training_data.csv"
     load_data = d_fetch.DataFetcher(csv_path)
 
     try:
-        weather_df = load_data.csv_to_df()
+        weather_df = await load_data.csv_to_df_async()
         # Make sure theconversion worked. Print basic info about the dataframe
         load_data.print_summary(weather_df)
 
@@ -149,10 +266,10 @@ def main() -> None:
         data_cleaner = d_fetch.DataCleaner(weather_df)
         cleaned_column = data_cleaner.data_to_numeric("MaxTemp")
 
-        # Process the data and print the statistics for the column
+        # Process the data and print the statistics for the column sequentially
         data_processor = DataProcessor(cleaned_column, "MaxTemp")
-        stats = data_processor.get_statistics()
-        data_processor.print_statistics(stats)
+        data_processor.get_statistics_multiprocessing()
+        # data_processor.print_statistics(stats)
 
     except FileNotFoundError:
         print("The file was not found. Please check the file path.")
@@ -162,4 +279,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     # Runs the main function when this file is executed
-    main()
+    asyncio.run(main())

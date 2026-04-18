@@ -4,6 +4,7 @@ Course: CS 3270-X01
 This module contains the DataStorage class for storing weather statistics in a text file.
 See main.py for AI usage disclosure.
 """
+import asyncio
 import logging
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import pyplot as plt
@@ -30,22 +31,29 @@ class DataStorer:
         self.filename = filename
         self.stats = stats
 
-    def write_txt(self) -> None:
+    def write_txt_file(self) -> None:
         """
-        Create a txt file and write to it.
+        Helper function that creates and writes to a text file.
         """
         with open(self.filename, 'w', encoding='utf-8') as file:
             file.write(str(self.stats))
         logger.info("Statistics written to %s successfully.", self.filename)
 
-    def __str__(self) -> str:
+    def write_txt(self) -> None:
         """
-        Returns a string of the DataStorer object.
+        Sequentially create txt file and write to it.
+        """
+        self.write_txt_file()
 
-        Returns:
-            str: A string representation of the DataStorer object.
+    async def write_txt_async(self) -> None:
         """
-        return f"DataStorage writing to {self.filename} with stats {self.stats}"
+        Asynchronously create txt file and write to it.
+        """
+        loop = asyncio.get_event_loop()
+
+        await loop.run_in_executor(None, self.write_txt_file)
+        logger.info("Statistics written to %s successfully.",
+                    self.filename)
 
     def write_pdf(self, analyzer, pdf_filename: str) -> None:
         """
@@ -67,8 +75,17 @@ class DataStorer:
                 plt.close(fig)
         logger.info("Plots written to weather_plots.pdf successfully.")
 
+    def __str__(self) -> str:
+        """
+        Returns a string of the DataStorer object.
 
-def main() -> None:
+        Returns:
+            str: A string representation of the DataStorer object.
+        """
+        return f"DataStorage writing to {self.filename} with stats {self.stats}"
+
+
+async def main() -> None:
     """
     Calls write_txt to write to a txt file.   
     """
@@ -95,7 +112,8 @@ def main() -> None:
         data_processor = d_process.DataProcessor(
             # Make sure the column matches the column name used in data_to_numeric
             cleaned_column, "MaxTemp")  # Initialize the DataProcessor object
-        stats = data_processor.get_statistics()  # Calculates statistics for the column
+        # Calculates statistics for the column
+        stats = data_processor.get_statistics_multiprocessing()
     except FileNotFoundError:
         print("The file was not found. Please check the file path.")
     except ValueError as e:
@@ -106,7 +124,8 @@ def main() -> None:
         try:
             # Initialize the DataStorer object
             storage = DataStorer("weather_stats.txt", stats)
-            storage.write_txt()  # Write the statistics to a text file
+            # Write the statistics to a text file asynchronously
+            await storage.write_txt_async()
         except ValueError as e:  # If there was an error writing to the file, print this message
             print(f"Value error: {e}")
 
@@ -123,4 +142,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     # Runs the main function when this file is executed
-    main()
+    asyncio.run(main())

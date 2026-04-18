@@ -3,6 +3,7 @@ This module contains pytests for the project.
 It tests the functionality of data fetching, data processing, 
 and data storage for the application.
 """
+import asyncio
 import pytest
 import pandas as pd
 import my_package.data_fetching as d_fetch
@@ -30,6 +31,28 @@ def test_csv_to_df_empty_file():
     data_fetcher = d_fetch.DataFetcher("")
     with pytest.raises(FileNotFoundError):
         data_fetcher.csv_to_df()
+
+
+# Test cases for csv_to_df_async method in DataFetcher class (data_fetching.py)
+def test_csv_to_df_async_correctly_loads():
+    """
+    Test that the CSV file loads correctly and returns a DataFrame asynchronously.
+    """
+    data_fetcher = d_fetch.DataFetcher(
+        "australia_weather_data/weather_training_data.csv")
+    df = asyncio.run(data_fetcher.csv_to_df_async())
+    assert df is not None
+    assert not df.empty
+
+
+def test_csv_to_df_async_empty_file():
+    """
+    Test an empty CSV file to make sure the DataFetcher class can catch 
+    without crashing asynchronously.
+    """
+    data_fetcher = d_fetch.DataFetcher("")
+    with pytest.raises(FileNotFoundError):
+        asyncio.run(data_fetcher.csv_to_df_async())
 
 
 # Test cases for column_checker method in DataCleaner class (data_fetching.py)
@@ -151,6 +174,59 @@ def test_get_statistics_no_data():
         data_processor.get_statistics()
 
 
+# Test cases for get_statistics_multiprocessing method in DataProcessor class (data_processing.py)
+def test_get_statistics_multiprocessing_valid_data():
+    """
+    Test the get_statistics_multiprocessing method with valid numerical data 
+    to make sure it calculates the statistics correctly using multiprocessing.
+    """
+    df = pd.DataFrame({
+        "NumberColumn": ["1.5", "2.3", "3.7"]
+    })
+    data_cleaner = d_fetch.DataCleaner(df)
+    numeric_column_gen = data_cleaner.data_to_numeric("NumberColumn")
+    data_processor = d_process.DataProcessor(
+        numeric_column_gen, "NumberColumn")
+    stats = data_processor.get_statistics_multiprocessing()
+    assert stats.mean == 2.5
+    assert stats.median == 2.3
+    assert stats.min == 1.5
+    assert stats.max == 3.7
+
+
+def test_get_statistics_multiprocessing_invalid_data():
+    """
+    Test the get_statisics_multiprocessing method with invalid data. 
+    Make sure the value error is raised.
+    """
+    df = pd.DataFrame({
+        # If I have any valid, it would not bring up the error
+        "NumberColumn": ["Squirrel", "Fox", "NaN", "Burger"]
+    })
+    data_cleaner = d_fetch.DataCleaner(df)
+    numeric_column_gen = data_cleaner.data_to_numeric("NumberColumn")
+    data_processor = d_process.DataProcessor(
+        numeric_column_gen, "NumberColumn")
+    with pytest.raises(ValueError):
+        data_processor.get_statistics_multiprocessing()
+
+
+def test_get_statistics_multiprocessing_no_data():
+    """
+    Test the get_statistics_multiprocessing method with an empty column. 
+    Make sure the value error is raised.
+    """
+    df = pd.DataFrame({
+        "NumberColumn": []
+    })
+    data_cleaner = d_fetch.DataCleaner(df)
+    numeric_column_gen = data_cleaner.data_to_numeric("NumberColumn")
+    data_processor = d_process.DataProcessor(
+        numeric_column_gen, "NumberColumn")
+    with pytest.raises(ValueError):
+        data_processor.get_statistics_multiprocessing()
+
+
 # Test case for write_txt method in DataStorer class (data_storage.py)
 # Using a tmp_path instead of a real location
 def test_write_txt_creates_file(tmp_path):
@@ -170,9 +246,28 @@ def test_write_txt_creates_file(tmp_path):
     assert filepath.exists()
     # If I want to see this fail, put asser not filepath.exists()
 
+
+# Test cases for write_txt_async method in DataStorer class (data_storage.py)
+def test_write_txt_async_creates_file(tmp_path):
+    """
+    Test that the write_txt_async method creates a text file with the 
+    correct content asynchronously.
+    """
+    stats = d_process.StatsSummary(
+        column="TestColumn",
+        mean=2.5,
+        median=2.3,
+        min=1.5,
+        max=3.7
+    )
+    filepath = tmp_path / "test_stats_async.txt"
+    data_storer = d_store.DataStorer(str(filepath), stats)
+    asyncio.run(data_storer.write_txt_async())
+    assert filepath.exists()
+    # If I want to see this fail, put asser not filepath.exists()
+
+
 # Reusable dataframe for testing DataAnalyzer class (data_analysis.py)
-
-
 @pytest.fixture
 def sample_df():
     """
