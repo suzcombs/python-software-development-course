@@ -225,7 +225,7 @@ def main() -> None:
 
         # Create a histogram for the specified column
         data_analyzer = DataAnalyzer(weather_df)
-        data_analyzer.create_histogram("MaxTemp")
+        data_analyzer.create_histogram("MinTemp")
         data_analyzer.create_boxplot("MaxTemp")
 
         # group data together to see the mean for each location with a specified column

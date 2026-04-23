@@ -6,6 +6,7 @@ and data storage for the application.
 import asyncio
 import pytest
 import pandas as pd
+from app import app, db
 import my_package.data_fetching as d_fetch
 import my_package.data_processing as d_process
 import my_package.data_storage as d_store
@@ -337,3 +338,44 @@ def test_hot_day_rain_likelihood(sample_df):
         (27, "Not Hot", 1),
         (30, "Not Hot", 0)
     ]
+
+
+# Test cases for web application
+@pytest.fixture
+def client():
+    """Configures testing for the db"""
+    app.config["TESTING"] = True
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+
+    with app.app_context():
+        db.create_all()
+        with app.test_client() as client:
+            yield client
+        db.session.remove()
+        db.drop_all()
+
+# test index page
+
+
+def test_index_page(client):
+    """Tests if the index page loads correctly"""
+    response = client.get("/")
+    assert response.status_code == 200
+
+
+def test_dashboard_get_not_allowed(client):
+    """Tests if the dashboard using get give 405. Not allowed"""
+    response = client.get("/dashboard")
+    assert response.status_code == 405
+
+
+def test_dashboard_post_allowed(client):
+    """Tests if the dashboard loads correctly"""
+    response = client.post("/dashboard")
+    assert response.status_code == 200
+
+
+def test_history_page(client):
+    """Tests if the query history page loads correctly"""
+    response = client.get("/history")
+    assert response.status_code == 200

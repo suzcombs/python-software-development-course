@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+  <h1>Query History</h1>
+  <table>
+    <tr>
+      <th>Location</th>
+      <th>Column</th>
+      <th>Time</th>
+    </tr>
+
+    {% for query in queries %}
+    <tr>
+      <td>{{ query.location }}</td>
+      <td>{{ query.column_name }}</td>
+      <td>{{ query.query_time.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <br><br>
+    <p>
+    <a href="/">Go back to the home page</a>
+  </p>
+
+{% endblock %}

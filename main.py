@@ -24,10 +24,13 @@ async def main() -> None:
     setup_logging()  # Set up logging for the application
     # Import and save CSV weather data into a dataframe
     csv_path = "australia_weather_data/weather_training_data.csv"
+    selected_column = "Temp9am"
     # Initialize the DataFetcher object
     load_data = d_fetch.DataFetcher(csv_path)
 
     stats = None  # Initialize stats variable
+    storage = None
+    weather_df_async = None
 
     # Load the data and process it
     try:
@@ -37,32 +40,16 @@ async def main() -> None:
         # Data cleaning convert data to numeric values.
         # Initialize the DataCleaner object
         data_cleaner = d_fetch.DataCleaner(weather_df_async)
-        cleaned_column_seq = data_cleaner.data_to_numeric(
-            "MaxTemp")  # Convert the column to numeric values sequentially
-        # Convert the column to numeric values using multiprocessing
-        cleaned_column_mult = data_cleaner.data_to_numeric("MaxTemp")
+        # Convert the column to numeric values
+        cleaned_column = data_cleaner.data_to_numeric(
+            selected_column)  # Convert the column to numeric values sequentially
 
         # Process the data and get the statistics for the column - sequentially
-        processor_seq = d_process.DataProcessor(
+        data_processor = d_process.DataProcessor(
             # Make sure the column matches the column name used in data_to_numeric
-            cleaned_column_seq, "MaxTemp")  # Initialize the DataProcessor object
+            cleaned_column, selected_column)  # Initialize the DataProcessor object
         # Calculates statistics for the column
-        processor_seq.get_statistics_multiprocessing()
-
-        # print("Statistics calculated sequentially: ")
-        # processor_seq.print_statistics(stats_seq)
-
-        # Process the data and get the statistics for the column - multiprocessing
-        processor_mult = d_process.DataProcessor(
-            # Make sure the column matches the column name used in data_to_numeric
-            cleaned_column_mult, "MaxTemp")  # Initialize the DataProcessor object
-        # Calculates statistics for the column using multiprocessing
-        stats_mult = processor_mult.get_statistics_multiprocessing()
-
-        # print("Statistics calculated using multiprocessing: ")
-        # processor_mult.print_statistics(stats_mult)
-
-        stats = stats_mult  # Use the multiprocessing statistics for storage
+        stats = data_processor.get_statistics_multiprocessing()
 
     except FileNotFoundError:
         print("The file was not found. Please check the file path.")
@@ -73,21 +60,23 @@ async def main() -> None:
     if stats is not None:
         try:
             # Initialize the DataStorer object
-            storage = d_store.DataStorer("weather_stats.txt", stats)
+            storage = d_store.DataStorer("output/weather_stats.txt", stats)
             # Write the statistics to a text file asynchronously
             await storage.write_txt_async()
         except ValueError as e:  # If there was an error writing to the file, print this message
             print(f"Value error: {e}")
 
     # Create plots and write to a PDF file
-    try:
-        data_analyzer = d_analyze.DataAnalyzer(weather_df_async)
-        # Write the plots to a PDF file
-        storage.write_pdf(data_analyzer, "weather_plots.pdf")
+    if weather_df_async is not None and storage is not None:
+        try:
+            data_analyzer = d_analyze.DataAnalyzer(weather_df_async)
+            # Write the plots to a PDF file
+            storage.write_pdf(
+                data_analyzer, "output/weather_plots.pdf", selected_column)
 
-    except ValueError as e:
-        print(
-            f"There is no numeric data for the specified column to plot: {e}")
+        except ValueError as e:
+            print(
+                f"There is no numeric data for the specified column to plot: {e}")
 
 
 if __name__ == '__main__':

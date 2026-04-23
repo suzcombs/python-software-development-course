@@ -55,7 +55,7 @@ class DataStorer:
         logger.info("Statistics written to %s successfully.",
                     self.filename)
 
-    def write_pdf(self, analyzer, pdf_filename: str) -> None:
+    def write_pdf(self, analyzer, pdf_filename: str, column_name: str) -> None:
         """
         Create a PDF file and write the plots to it.
 
@@ -64,8 +64,8 @@ class DataStorer:
         """
         with PdfPages(pdf_filename) as pdf:
             figures = [
-                analyzer.create_histogram("MaxTemp"),
-                analyzer.create_boxplot("MaxTemp"),
+                analyzer.create_histogram(column_name),
+                analyzer.create_boxplot(column_name),
                 analyzer.create_barchart_by_location("Rainfall"),
                 analyzer.histogram_rainfall(),
                 analyzer.heat_rain_likelihood_barchart()
@@ -123,7 +123,7 @@ async def main() -> None:
     if stats is not None:
         try:
             # Initialize the DataStorer object
-            storage = DataStorer("weather_stats.txt", stats)
+            storage = DataStorer("output/weather_stats.txt", stats)
             # Write the statistics to a text file asynchronously
             await storage.write_txt_async()
         except ValueError as e:  # If there was an error writing to the file, print this message
@@ -133,7 +133,7 @@ async def main() -> None:
     try:
         data_analyzer = d_analyze.DataAnalyzer(weather_df)
         # Write the plots to a PDF file
-        storage.write_pdf(data_analyzer, "weather_plots.pdf")
+        storage.write_pdf(data_analyzer, "output/weather_plots.pdf", "MaxTemp")
 
     except ValueError as e:
         print(

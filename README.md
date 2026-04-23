@@ -9,6 +9,8 @@ This is a course long project that analyzes and visualizes weather data. It is b
 Use pandas to transform a csv file into a dataframe
 Install matplotlib for data visualization
 
+For the web application, install Flask and Flask SQL alchemy
+
 To install my_package through by typing in the terminal
 
 ```python
@@ -93,6 +95,22 @@ There were Pytests created for each of these methods. these Pytests included the
 - get_statistics_multiprocessing: tests were created for when there is valid data, invalid data, and no data.
 
 Doctests for csv_to_df_async() and get_statistics_multiprocessing() were also created.
+
+## Module 9 - Web Development
+
+To run this web application, Flask and Flask SQLalchemy need to be installed. See requirements.txt for all necessary installations. To establish the connection type python app.py into the terminal.
+
+In this module, a 3-tier web application was created using Flask with jinja, HTML, and Python. The 3 tiers were: user interface where the user can interact with the weather data, Flask was used for the application server/business logic, and SQL alchemy was used to create a SQLite database. The web application utilized some of the code written in previous modules.
+
+The website allows a user to select a location and a column from the Australia weather dataset. If the user does not select a location or column, then they are redirected to the error page stating that there was an error and whether it was due to a missing location or column. Once the user has selected a valid location and column, they are directed to the dashboard. The dashboard includes information about the location and column selected, statistics for that column, and a histogram of the column and location. On this dashboard are options to go back to the home page or to view query history. The application stores the query history in a weather database using SQLite. The history page shows a list of all the queries including the location selected, column selected, and time it occurred. This history page also includes an option to go back to the home page.
+
+Testing cases:
+
+- Manual test selecting no location. This lead to the error page stating missing location
+- Manual test selecting no column. This lead to the error page stating missing column
+- Visual inspection that the dashboard and history pages loaded with correct information
+- Pytests were created to make sure the index, dashboard, and history pages loaded get a status code 200. For the dashboard an additional test was created to make sure the status code was 405.
+- For the Pytests to work correctly to import app.py, a pytest.ini was created and put in the root folder.
 
 ## Author
 

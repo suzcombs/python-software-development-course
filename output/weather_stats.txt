@@ -1,0 +1,5 @@
+Statistics Summary for Temp9am Column
+Mean: 16.97
+Median: 16.7
+Min: -7.0
+Max: 40.2

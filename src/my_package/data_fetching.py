@@ -201,5 +201,3 @@ async def main() -> None:
 if __name__ == '__main__':
     # Runs the main function when this file is executed
     asyncio.run(main())
-
-# %%
