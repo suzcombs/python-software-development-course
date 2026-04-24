@@ -6,10 +6,12 @@ This is a course long project that analyzes and visualizes weather data. It is b
 
 ## Installation
 
-Use pandas to transform a csv file into a dataframe
-Install matplotlib for data visualization
+- pandas to transform a csv file into a dataframe
+- matplotlib for data visualization
+- Flask and Flask SQL alchemy for the web application
+- scikit-learn for machine learning modeling
 
-For the web application, install Flask and Flask SQL alchemy
+For all installation essentials, see requirements.txt
 
 To install my_package through by typing in the terminal
 
@@ -111,6 +113,25 @@ Testing cases:
 - Visual inspection that the dashboard and history pages loaded with correct information
 - Pytests were created to make sure the index, dashboard, and history pages loaded get a status code 200. For the dashboard an additional test was created to make sure the status code was 405.
 - For the Pytests to work correctly to import app.py, a pytest.ini was created and put in the root folder.
+
+## Module 10 - Machine Learning
+
+This model introduced machine learning into the project. A new module ml_model.py was created to keep the machine learning code together. In it are 2 functions: train_model() and predict_rain_tomorrow(). In train_model(), it reads in a csv file and selects columns for input and a column for the outcome. I selected the columns MinTemp, MaxTemp, WindGustSpeed, Humidity9am, Humidity3pm, Pressure9am, Pressure3pm for input. For the outcome column, I selected RainTomorrow. These columns were put together into a dataframe and then split into 4 groups. X train, X test, y train, y test. The percent that was put into the test groups was 20% and the percent in the training group was 80%. The higher percent for the training group is so there are more data points the model can learn from.
+
+Using scikit-learn, I tried a couple different models and made some modifications to the arguments. The models I tried were:
+
+- DecisionTreeClassifier
+- LogisticRegression
+- RandomForestClassifier
+
+The model that had the highest accuracy was RandomForestClassifier. This model along with the 7 columns stated above had an accuracy of about 84.50%. The train_model function returns the model and the accuracy score. The predict_rain_tomorrow function calls train_model() and gives a prediction based on the model on whether it is likely to rain tomorrow or not.
+
+The model was integrated into the web application. On the dashboard, it states the prediction of whether it is likely to rain tomorrow or not and give the model accuracy percentage.
+
+Test cases:
+
+- test_train_model_return: tests a model is made and a score is returned with a value between 0 and 1 (for a percentage)
+- test_predict_rain_tomorrow: tests a prediction is made and a score between 0 and 1 is returned (for a percentage)
 
 ## Author
 

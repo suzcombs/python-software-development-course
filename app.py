@@ -1,7 +1,8 @@
 """
 Author: Suzanne Combs
 Course: CS 3270-X01
-Uses Flask to create a web application using python, html, and SQLite
+Uses Flask to create a web application using python, html, and SQLite.
+Includes machine learning model for raining tomorrow predictions
 
 See main.py for AI usage disclosure.
 """
@@ -15,6 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 import my_package.data_fetching as d_fetch
 import my_package.data_processing as d_process
 import my_package.data_analysis as d_analyze
+import my_package.ml_model as ml_model
 
 
 app = Flask(__name__)
@@ -57,7 +59,7 @@ def index():
 
 @app.route("/dashboard", methods=["POST"])
 def dashboard():
-    """Sets up the dashboard page of the website """
+    """Sets up the dashboard page of the website"""
     selected_location = request.form.get("location")
     selected_column = request.form.get("column")
 
@@ -105,11 +107,38 @@ def dashboard():
     # Encode the image to use for HTML
     plot_web = base64.b64encode(hist_img.getvalue()).decode()
 
+    # ML prediction - clean the columns
+    prediction_data = filtered_df[ml_model.input_columns].dropna()
+
+    # Empty values to be filled with results predict_rain_tomorrow
+    prediction = None
+    model_score = None
+
+    has_data = not prediction_data.empty
+
+    if has_data:
+        # Get the mean for all the columns that have data
+        mean_data = prediction_data.mean()
+        # Get the mean values for the specified columns
+        prediction_values = [
+            mean_data["MinTemp"],
+            mean_data["MaxTemp"],
+            mean_data["WindGustSpeed"],
+            mean_data["Humidity9am"],
+            mean_data["Humidity3pm"],
+            mean_data["Pressure9am"],
+            mean_data["Pressure3pm"]
+        ]
+
+        prediction, model_score = ml_model.predict_rain_tomorrow(
+            prediction_values)
+
     # Need to close
     plt.close(hist_fig)
 
     return render_template("dashboard.html", location=selected_location,
-                           column=selected_column, stats=stats, plot_web=plot_web)
+                           column=selected_column, stats=stats, plot_web=plot_web,
+                           prediction=prediction, model_score=model_score)
 
 
 # Display the query history

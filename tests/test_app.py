@@ -11,6 +11,7 @@ import my_package.data_fetching as d_fetch
 import my_package.data_processing as d_process
 import my_package.data_storage as d_store
 import my_package.data_analysis as d_analysis
+import my_package.ml_model as ml_model
 
 
 # Test cases for csv_to_df method in DataFetcher class (data_fetching.py)
@@ -351,8 +352,6 @@ def client():
         db.create_all()
         with app.test_client() as client:
             yield client
-        db.session.remove()
-        db.drop_all()
 
 # test index page
 
@@ -371,7 +370,9 @@ def test_dashboard_get_not_allowed(client):
 
 def test_dashboard_post_allowed(client):
     """Tests if the dashboard loads correctly"""
-    response = client.post("/dashboard")
+    response = client.post("/dashboard",
+                           data={"location": "Adelaide",
+                                 "column": "MaxTemp"})
     assert response.status_code == 200
 
 
@@ -379,3 +380,31 @@ def test_history_page(client):
     """Tests if the query history page loads correctly"""
     response = client.get("/history")
     assert response.status_code == 200
+
+
+# Test cases for ml_model.py
+# train_model()
+def test_train_model_return():
+    """
+    Test to ensure a model is made and score returns 
+    a value between 0 and 1 for a percentage for score returned
+    """
+    model, score = ml_model.train_model()
+
+    assert model is not None
+    assert 0 <= score <= 1
+
+# predict_rain_tomorrow()
+
+
+def test_predict_rain_tomorrow_return():
+    """
+    Test to ensure a prediction is made
+    and value between 0 and 1 for a percentage for score returned
+    """
+    prediction_values = [12.1, 36.4, 33.0, 55.0, 32.1, 1013.4, 1009.3]
+    prediction, score = ml_model.predict_rain_tomorrow(prediction_values)
+
+    value = [0, 1]
+    assert prediction in value
+    assert 0 <= score <= 1
