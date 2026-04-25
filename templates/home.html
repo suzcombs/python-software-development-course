@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <h1>Australia Weather Data</h1>
+    <p>
+        Please select a location and a column to see summary statistics and a histogram of the data. 
+    </p>
+    <form action="/dashboard" method="post" class="card p-4 shadow-sm">
+        <div class="mb-3">
+            <label for="location">Choose a location:</label>
+            <select name="location"> <!--can add required-->
+                <option disabled selected value="">Location</option>
+                {% for location in locations %}
+                <option value="{{ location }}">{{ location }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label for="column">Choose a column:</label>
+            <select name="column"> <!--can add required-->
+                <option disabled selected value="">Column</option>
+                {% for column in columns %}
+                <option value="{{ column }}">{{ column }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">View the Dashboard</button>
+    </form>
+    <p>
+        <a href="/logout">Logout</a>
+    </p>
+
+{% endblock %}

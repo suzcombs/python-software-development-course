@@ -369,17 +369,17 @@ def test_dashboard_get_not_allowed(client):
 
 
 def test_dashboard_post_allowed(client):
-    """Tests if the dashboard loads correctly"""
+    """Tests if the dashboard redirects because it requires login"""
     response = client.post("/dashboard",
                            data={"location": "Adelaide",
                                  "column": "MaxTemp"})
-    assert response.status_code == 200
+    assert response.status_code == 302
 
 
 def test_history_page(client):
-    """Tests if the query history page loads correctly"""
+    """Tests if the history redirects because it requires login"""
     response = client.get("/history")
-    assert response.status_code == 200
+    assert response.status_code == 302
 
 
 # Test cases for ml_model.py
@@ -394,9 +394,8 @@ def test_train_model_return():
     assert model is not None
     assert 0 <= score <= 1
 
+
 # predict_rain_tomorrow()
-
-
 def test_predict_rain_tomorrow_return():
     """
     Test to ensure a prediction is made
@@ -408,3 +407,10 @@ def test_predict_rain_tomorrow_return():
     value = [0, 1]
     assert prediction in value
     assert 0 <= score <= 1
+
+
+# Testing for login
+def test_upload_login_required(client):
+    """Tests to make sure user not logged in is redirected"""
+    response = client.get("/upload")
+    assert response.status_code == 302

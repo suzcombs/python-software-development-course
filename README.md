@@ -8,8 +8,9 @@ This is a course long project that analyzes and visualizes weather data. It is b
 
 - pandas to transform a csv file into a dataframe
 - matplotlib for data visualization
-- Flask and Flask SQL alchemy for the web application
+- Flask and Flask-SQL-alchemy for the web application
 - scikit-learn for machine learning modeling
+- email-validator, Flask-Bcrypt, Flask-Login, Flask-WTF, and WTForms for login and account registration
 
 For all installation essentials, see requirements.txt
 
@@ -132,6 +133,32 @@ Test cases:
 
 - test_train_model_return: tests a model is made and a score is returned with a value between 0 and 1 (for a percentage)
 - test_predict_rain_tomorrow: tests a prediction is made and a score between 0 and 1 is returned (for a percentage)
+
+## Final Module
+
+The purpose of this web application is to analyze the weather data of a CSV file. This web application lets you view statistics, a histogram, and a prediction of whether it is likely to rain tomorrow based on a chosen location.
+
+There were 10 different phases (or modules) completed for this project:
+
+- Module 1: set up the environment for the project, read in the dataset csv file, and made it into a pandas data frame.
+- Module 2: added the ability to view statistics of the data frame. Created a package of python modules.
+- Module 3: refactored the program into object oriented programming. This allowed for better organization. Type hints were also added at this stage.
+- Module 4: a generator was added to calculate the statistics for a chosen column. File and error handling were introduced to gracefully catch errors and logs for errors were sent to app.log
+- Module 5: addition of pytest and doctests for automated testing.
+- Module 6: data analysis was included in this portion of the project. Function features like zip, map, groupie, lambda, and filter were used to see patterns in the data. Visualizations for different histograms and bar charts were added.
+- Module 7: asynchronous programming and parallelism were implemented to improve efficiency for the application. This is especially helpful if the scale of the project increases.
+- Module 9: the program was turned into a web application during this phase using Flask as the framework. it is a 3-tier application with HTML, Flask, and SQLite creating the user interface, application server, and database respectively.
+- Module 10: a model was created to predict the likelihood of rain tomorrow. This model was integrated into the web application.
+- Final Module: the web application was given more security with a login page, a user now needs to upload a CSV file, and some css styling was added.
+
+The landing page of the web application is a login page. A person needs to have a valid account in order to view the other pages of the web application. If someone doesn't have a valid account, then you can register. The user names and passwords are added to a user database. If the username is already taken, then it will make you select another username. The passwords are encrypted with a hash for more security. On the login page, the customers password is checked to see if it matches the database.
+After a user successfully logs in, they are taken to an Upload CSV page. A user must upload a valid CSV file to continue to the dashboard. On the home page of the web application, the user can choose a location and a column to view. On the dashboard page, the statistics, a histogram, and the prediction on whether or not it is likely to rain tomorrow is shown. From here, you can either log out, go back to the homepage, or view query history. In query history there is a history of the location, column, and time of a users query.
+
+Bootstrap for css was added to parts of the web application. Buttons were styled and a margin on the top and the left side were added for more padding. The font was changed to Nunito.
+
+Test added:
+
+- test_upload_login_required tests to make sure a user who is not logged in is redirected to the login page.
 
 ## Author
 
